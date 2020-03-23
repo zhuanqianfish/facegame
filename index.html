@@ -141,6 +141,11 @@
        <div class="inner" id="inner">
        </div>
        
+      
+    </div>
+    <div style="margin-top:20px;text-align:center;">
+    	<select id="videoSource" ></select>
+       	<button id="btnOpen1" class="btn btn-default" type="button" >切换摄像头</button>
     </div>
     <div id="footer">
     	<p><button type="button" id="btnStart" onclick="start()">开始</button></p>
@@ -148,6 +153,7 @@
     		欢迎加微：<span style="color:#E64A19">huwenapp</span>
     	</p>
     	<p id="debugMsg"></p>
+    	<p id="tongji"><script type="text/javascript" src="https://s4.cnzz.com/z_stat.php?id=1278707014&web_id=1278707014"></script></p>
     </div>
     
     
@@ -157,7 +163,7 @@
     <script src="https://cdn.bootcss.com/sweetalert/2.1.2/sweetalert.min.js"></script>
     
     <script type="text/javascript">
-		var debug = true;	//调试模式
+		var debug = false;	//调试模式
 		var speed = 10;		//卷轴滚动速度
 		var space = 140;	//冰柱间隔	
 		var isStart = false;//开始标记
@@ -171,7 +177,7 @@
 		var titleList = ['潜艇新手', '潜艇新手', '潜艇新手', '潜艇新手','潜艇新手',
 							'潜艇新人', '潜艇新人', '潜艇新人', '潜艇新人',
 							'潜艇高手', '潜艇高手', '潜艇高手', '潜艇高手',
-							'潜艇大师',	'潜艇大师', '潜艇大师', '潜艇大师',
+							'潜艇大师',	'潜艇大师', '潜艇大师', '潜艇大师','潜艇大师',
 							'潜艇王者'
 						]
 		
@@ -222,9 +228,9 @@
 	    
 	    navigator.getUserMedia({video:true}, gotStream, noStream);
 	    
-	
+		var _streamCopy = null;
 	    function gotStream(stream) {
-	    
+	      _streamCopy = stream; // make stream available to console
 	      try {
 		 	myVideo.srcObject = stream;
 	      	myVideo2.srcObject = stream; 
@@ -355,6 +361,7 @@
 					isStart = false;
 					clearInterval(funFlag);	//停
 					swal('称号：'+ titleList[nowI], '得分：'+ nowI + '分');
+					init(); 
 				}else{
 					inner.css('left', left - speed);
 				}
@@ -378,7 +385,75 @@
 		
 		</script>
     <script>
-    
+        //#################### Video Source #######################3
+                var videoElement = document.querySelector('video');
+                var videoSelect = document.querySelector('select#videoSource');
+         
+         
+                navigator.mediaDevices.enumerateDevices()
+                    .then(gotDevices).then(getStream).catch(handleError);
+         
+         
+                videoSelect.onchange = getStream;
+         
+         
+         
+         
+                function gotDevices(deviceInfos) {
+                    for (var i = 0; i < deviceInfos.length; ++i) {
+                        var deviceInfo = deviceInfos[i];
+                        var option = document.createElement('option');
+                        option.value = deviceInfo.deviceId;
+                        if (deviceInfo.kind === 'videoinput') {
+                            option.text = deviceInfo.label ||
+                                'camera ' +
+                                (videoSelect.length + 1);
+                            videoSelect.appendChild(option);
+                        } else {
+                            console.log('Found ome other kind of source/device: ', deviceInfo);
+                        }
+                    }
+                }
+         
+         
+               
+                function getStream() {
+                    if (_streamCopy != null) {
+                        try {
+                            _streamCopy.stop(); // if this method doesn't exist, the catch will be executed.
+                        } catch (e) {
+                            _streamCopy.getVideoTracks()[0].stop(); // then stop the first video track of the stream
+                        }
+                    }
+                    
+                    var constraints = {
+                        audio:false,
+                        video: {
+                            optional: [
+                                {
+                                    sourceId: videoSelect.value
+                                }
+                            ]
+                        }
+                    };
+                    
+                    navigator.mediaDevices.getUserMedia(constraints).then(gotStream).catch(handleError);
+                }
+         
+         
+                // function gotStream(stream) {
+                //     _streamCopy = stream; // make stream available to console
+                //     videoElement.srcObject = stream;
+                // }
+         
+         
+                function handleError(error) {
+                    //alert(error.name + ": " + error.message);
+                    alert('再重新选择一下就好啦');
+                }
+         
+         
+                //######################## End Video Source #################
     </script>
 </body>
 </html>
