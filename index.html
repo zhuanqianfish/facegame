@@ -1,0 +1,384 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>面部检测游戏 - 潜水艇</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <style>
+    	*{margin:0;padding:0;	box-sizing: border-box;}
+    	body{width:100%}
+    	#top{
+    		height:50px;
+    		width: 100%;
+    		background-color:#E64A19;
+    		color: #ffffff;
+    	}
+    	
+    	#submarine{
+    		display: block;
+    		width:40px;
+    		height:30px;
+    		position: absolute;
+    		left:50px;
+    		top:100px;
+    		z-index: 999;
+    	}
+    	.palyground{
+    		position: relative;
+    		height:400px;
+    		width: 100%;
+    		display: block;
+    		overflow-x: hidden;
+    		background-color: #90A4AE;
+    	}
+    	.inner{
+    		position: absolute;
+    		z-index: 100;
+    		top:0;
+    		left:100px;
+    		width: 4000px;	
+    		height:400px;
+    		/*background-color: #26C6DA;*/
+    		background: rgba(255,255,255,0.0);
+    	}
+    	
+    	
+    	.inBox{
+    		display: inline-block;
+    		height:400px;
+    		margin-left: 140px;
+    	}
+    	
+    	.iceBlock{
+    		display:block;
+    		position: absolute;
+    		width:40px; 
+    		background-color:#81D4FA;
+			border: 1px solid #dddddd;
+    	}
+    	.topIce{
+    		top:0;
+    	}
+    	.bottomIce{
+    		bottom:0;
+    	}
+    	
+    	
+		.rect {
+			width: 80px;
+		      height: 80px;
+		      position: absolute;
+		      left: -1000px;
+		      top: -1000px;
+	    }
+    	
+    	#demo-container{
+    		position: absolute;top:0;left:0;
+    		width:100vw;
+    		height:100%;
+    		z-index: 10;
+    	}
+    	#myVideo{
+    		position: absolute;
+    		top:40%;
+    		left:0;
+    		width:25vw;
+    		height:25%;
+    		z-index: 1;
+    		left:40%;
+    		display: hidden;
+    	}
+    	#myVideo2{
+    		position: absolute;
+    		top:0;
+    		left:0;
+    		width:100vw;
+    		height:100%;
+    		z-index: 2;
+    	}
+    	#canvas{
+    		position: absolute;
+    		top:0;
+    		left:0;
+    		width:100%;	
+    		height:100%;
+    		z-index: 10;
+    	}
+    	
+    	#footer{
+    		margin-top: 20px;
+    		text-align: center;
+    	}
+    	#btnStart{
+    		margin:0 auto;
+    		margin-bottom: 20px;
+    		font-size: 1.0rem;
+    		border: 1px solid #ffffff;
+    		background-color: #E64A19;
+    		color:  #ffffff;
+    		display: block;
+    		width: 200px;
+    		height:50px;
+    		text-align: center;
+    	}
+    </style>
+</head>
+<body>
+	<div id="top">
+		
+	</div>
+    <div class="palyground">
+    	<img id="submarine" src="data:image/png;base64,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" 
+    		alt="虎文_鹦鹉螺号" />
+    		
+    	<div class="demo-container" id="demo-container">
+		    <video id="myVideo" preload autoplay loop muted style="position: absolute"></video>
+		    <video id="myVideo2" preload autoplay loop muted style="position: absolute"></video>
+		    <canvas id="canvas" height="400" style="position: absolute" ></canvas>
+		</div>
+		
+       <div class="inner" id="inner">
+       </div>
+       
+    </div>
+    <div id="footer">
+    	<p><button type="button" id="btnStart" onclick="start()">开始</button></p>
+    	<p>虎文信息科技：各类微信/抖音 小程序定制开发，商城/CRM系统定制<br>
+    		欢迎加微：<span style="color:#E64A19">huwenapp</span>
+    	</p>
+    	<p id="debugMsg"></p>
+    </div>
+    
+    
+    <script src="https://cdn.bootcss.com/zepto/1.2.0/zepto.min.js"></script>
+    <script src="https://cdn.bootcss.com/tracking.js/1.1.3/tracking-min.js"></script>
+    <script src="https://cdn.bootcss.com/tracking.js/1.1.3/data/face-min.js"></script>
+    <script src="https://cdn.bootcss.com/sweetalert/2.1.2/sweetalert.min.js"></script>
+    
+    <script type="text/javascript">
+		var debug = true;	//调试模式
+		var speed = 10;		//卷轴滚动速度
+		var space = 140;	//冰柱间隔	
+		var isStart = false;//开始标记
+		var oldy = 150;		//当前上面冰柱高度
+		var iceList = [];   //冰柱数组,同时也是判定范围
+		var m_width = 3000;	//场景宽度
+		var iceNum = 18;	//冰柱数量
+		var inner = $("#inner");
+		var funFlag = 0;
+		var nowI = 0;	//当前正在通过的冰柱，也相当于得分
+		var titleList = ['潜艇新手', '潜艇新手', '潜艇新手', '潜艇新手','潜艇新手',
+							'潜艇新人', '潜艇新人', '潜艇新人', '潜艇新人',
+							'潜艇高手', '潜艇高手', '潜艇高手', '潜艇高手',
+							'潜艇大师',	'潜艇大师', '潜艇大师', '潜艇大师',
+							'潜艇王者'
+						]
+		
+		//碰撞检测
+		//nowI: 当前正在通过的冰柱
+		//y1：当前安全上限
+		//y2：当前安全下限
+		//left ： 当前潜水艇位置（实际是卷轴滚动了多少）
+		var	check =function(nowI, y1 , y2, left) {
+			if(left > 0){		//一开始有左偏移量
+				return false;	
+			}
+			left = Math.abs(left) - 40;
+			console.log(left + ' nowI:' + nowI);
+			if(nowI <= iceNum && (left > ( space * nowI )) && (left < space * nowI + 40 ) ){
+				var n_st = $("#submarine").position().top;	//当前潜艇位置
+				console.info('n_st:' + n_st + '  y1:' + y1 + '  y2:' + y2);
+				return (n_st <= y1 || (n_st + 30) >= y2);
+			}
+			return false;
+		}
+		
+		
+		//生成随机数
+		function randomNum(oldy){
+			if(Math.random() > 0.5){ //升高
+				if( oldy > 120 ){	//达到最高
+					oldy -= 40;
+				}
+			}else{				//降低
+				if( oldy < 220 ){	//达到最低
+					oldy += 40;
+				}
+			}
+			return oldy;
+		}
+		//	alert(collision($('#a'), $('#b')));
+		
+		var submarine = $("#submarine");//潜水艇
+		////////////////开始面部追踪逻辑///////////////////////////////
+		
+		 //激活摄像头
+	    navigator.getUserMedia  = navigator.getUserMedia ||
+	      navigator.webkitGetUserMedia ||
+	      navigator.mozGetUserMedia ||
+	      navigator.msGetUserMedia;
+	      
+	    
+	    navigator.getUserMedia({video:true}, gotStream, noStream);
+	    
+	
+	    function gotStream(stream) {
+	    
+	      try {
+		 	myVideo.srcObject = stream;
+	      	myVideo2.srcObject = stream; 
+	      } catch (error) {
+			 myVideo.src = URL.createObjectURL(stream);	//双video，第一个为第二个的四分之一，用于计算
+	    	 myVideo2.src = URL.createObjectURL(stream);	//第二个用于显示
+		  }
+	      myVideo.onerror = function () {
+	        stream.stop();
+	      };
+	      stream.onended = noStream;
+	      myVideo.onloadedmetadata = function () {
+	        //alert('摄像头成功打开！');
+	      };
+	    }
+	
+	    function noStream(err)
+	    {
+	      alert('初始化失败，请检查摄像头权限');
+	      console.log(err);
+	    }
+	
+	    //获取画布
+	    var canvas = document.getElementById('canvas');
+	    var context = canvas.getContext('2d');
+	    //检测人脸
+	    var objects = new tracking.ObjectTracker(['face']);
+		
+		var oldSY = 0; //记录上次潜水艇位置，防止跳动幅度过大
+		
+	    objects.on('track',function (event)
+	    {
+	        context.clearRect(0, 0, canvas.width, canvas.height);
+	
+	        if(event.data.length  === 0)
+	        {
+	
+	        }
+	        else
+	        {
+	           event.data.forEach(function(rect)
+	           {
+	           	
+	           	rect.x = rect.x * 4;
+	           	rect.y = rect.y * 4;
+	           	rect.width = rect.width * 2;
+	           	rect.height = rect.height * 4;
+	            
+	            var newSY = rect.y + rect.height/2;	//新位置
+				if(oldSY == 0){	//初次初始化位置
+					oldSY = newSY;
+				}
+				if( Math.abs(oldSY - newSY) < 100){	//防止检测不到脸部突然跳动，偏移量小于100像素还可以接受
+					submarine.css('top', newSY);
+					oldSY = newSY;
+				}
+	             
+	            if(debug){
+	             	//在图中画框框
+	            	context.strokeStyle = '#a64ceb';
+	            	context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+	            	
+	            	context.font = '11px Helvetica';
+	            	context.fillStyle = "#fff";
+	             	context.fillText('x: ' + rect.x + 'px', rect.x + rect.width + 5, rect.y + 11);
+		            context.fillText('y: ' + rect.y + 'px', rect.x + rect.width + 5, rect.y + 22);
+		            context.fillText('h: ' + rect.height + 'px', rect.x + rect.width + 5, rect.y + 32);
+		            //$("#debugMsg").text('SY值： ' + Math.abs(oldSY - newSY));
+	             }
+	             
+			
+				
+				
+	           });
+	        }
+	
+	    });
+	
+	    //激活
+	    tracking.track('#myVideo', objects);
+		
+		//////////////end 结束面部追踪逻辑//////////////////////////////
+		
+		
+		
+		//初始化冰柱
+		function init(){
+			isStart = false;
+			oldy = 150;	//当前上面冰柱高度
+			funFlag = 0;
+			nowI = 0;	//当前正在通过的冰柱，也相当于得分
+			iceList = [];   //冰柱数组,同时也是判定范围
+		
+			
+			inner.empty();
+			$("#debugMsg").empty();
+			
+			//初始化冰柱
+			for(var i = 0; i < iceNum ;i++){
+				var temp1 = oldy;
+				var temp2 = temp1 + 40 + 30;	//30是潜艇高度
+				oldy = randomNum(oldy); // 更新oldy 值,也就是更新上一个冰柱高度
+				//console.info({y1:temp1, y2:temp2});
+				iceList.push({y1:temp1, y2:temp2});
+				var tempStr = '<div class="inBox">'
+				    			+ '<div id="it_' + i + '" class="iceBlock topIce" style="height:' + temp1 +'px"></div>'
+				    			+ '<div id="ib_' + i + '" class="iceBlock bottomIce" style="height:' + (400 - temp2) + 'px"></div>'
+				    		+ '</div>';
+				//console.log(tempStr);
+	    		inner.append(tempStr);
+			}
+			inner.css('left', '100px');
+			
+		}
+		
+	
+		//运行
+		var run = function(){
+			var left =  inner.position().left ;
+			if(left > -m_width &&  nowI < iceNum ){
+				nowI = parseInt(Math.abs(left) / space);
+				
+				$("#debugMsg").text('当前得分： ' + nowI);
+
+				var checkFlag = check(nowI, iceList[nowI].y1, iceList[nowI].y2, left);
+				
+				if(checkFlag){	//碰到冰柱
+					isStart = false;
+					clearInterval(funFlag);	//停
+					swal('称号：'+ titleList[nowI], '得分：'+ nowI + '分');
+				}else{
+					inner.css('left', left - speed);
+				}
+				
+			}else{
+				swal('称号：' +titleList[nowI], '得分：'+ nowI + '分');
+				isStart = false;
+				clearInterval(funFlag);	//停
+			}
+		}
+		
+		$(function(){
+			init();
+		})
+		
+		function start(){
+			init();
+			isStart = true;
+			funFlag = setInterval(run, 100);
+		}
+		
+		</script>
+    <script>
+    
+    </script>
+</body>
+</html>
